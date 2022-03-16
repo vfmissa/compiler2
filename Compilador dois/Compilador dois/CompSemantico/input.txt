@@ -1,0 +1,24 @@
+program teste
+    real: a,b;
+	integer: c, d;
+    integer:i,j;
+begin
+    read(a);
+    read(c);
+    read(j);
+    j:=4*6*(a+c);
+    b := a * a + a;
+    d := 2*c + c;
+    if a = (2*j)then
+        write(a);
+        write(c)
+    else
+  	    write(b);
+        
+    $;
+    if d <= c then
+  	    write(d)
+    else
+  	    write(c)
+    $
+end.
