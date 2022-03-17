@@ -21,9 +21,12 @@ public class SintaticoProgramaV2 {
     
     int i;  // index de codigoHIP
     int P; //desvio de procedure
+    int E; //fim do procedimento e desalocação das variaveis
+    int N; //NUMERO DE PARAMETROS
     int S =0; //topo pilhaDados
     int end_rel; //posição da variavel na pilha
     int prim_instru; //onde começa o procedimento
+
 
     String isCod="";        //indica se está acontecendo um comando de leitura
     int tempAloc= 0;
@@ -125,6 +128,15 @@ public class SintaticoProgramaV2 {
         System.out.println("simbolo antes de begin>> "+simbolo.getValor());
         if((verificaSimbolo("begin"))){
             obtemSimbolo();
+            i=i+1;
+            P=i;
+            codigoHip.add(prim_instru,prim_instru+".DSVI "+ P);
+            try {
+                outputtxt("begin");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             Comandos();
         }
         if(verificaSimbolo("end")){
@@ -183,7 +195,8 @@ public class SintaticoProgramaV2 {
             try {
 
                 i=i+1;
-                outputtxt(i+".DSVI "+ P);
+                prim_instru = i;
+                outputtxt("");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -255,7 +268,15 @@ public class SintaticoProgramaV2 {
             Comandos();
         }
         if(verificaSimbolo("end")){
-            obtemSimbolo();
+            obtemSimbolo(); //fim procedimento
+            i=i+1;
+            E=i+N+1;
+            try {
+                outputtxt(i+".PUSHER "+ E);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             
         }
     }
@@ -480,7 +501,10 @@ public class SintaticoProgramaV2 {
                 }
                 if(tabelaProcedimento.containsKey(simbolo.getValor())){
 
-
+                    i=i+1;
+                    
+                    //P=i;
+                    //codigoHip.add(prim_instru, "DSVI "+ P);
                     
                 }
 
@@ -763,6 +787,7 @@ public class SintaticoProgramaV2 {
         if (simbolo == null) {
         System.out.println("Tudo Certo!");
         try {
+            i=i+1;
             outputtxt("PARA");
         } catch (IOException e) {
             // TODO Auto-generated catch block
