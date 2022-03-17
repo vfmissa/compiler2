@@ -17,7 +17,7 @@ public class SintaticoProgramaV2 {
     ArrayList<Double>pilhaD = new ArrayList<Double>();
 
     int i; // index de codigoHIP
-    int P; // desvio de procedure
+    int P; // desvio depois do procedure
     int E; // fim do procedimento e desalocação das variaveis
     int N; // NUMERO DE PARAMETROS
     int S = 0; // topo pilhaD
@@ -120,8 +120,7 @@ public class SintaticoProgramaV2 {
         if ((verificaSimbolo("begin"))) {
             obtemSimbolo();
             i = i + 1;
-            P = i;
-            codigoHip.add(prim_instru, prim_instru + ".DSVI " + P);
+            codigoHip.add(prim_instru, prim_instru + ".DSVI " + i);
             try {
                 outputtxt("begin");
             } catch (IOException e) {
@@ -180,7 +179,7 @@ public class SintaticoProgramaV2 {
 
                 i = i + 1;
                 prim_instru = i;
-                outputtxt("");     //inicio do procedimento vai aqui
+                outputtxt("");     //inicio do procedure vai aqui
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -222,6 +221,7 @@ public class SintaticoProgramaV2 {
     }
 
     private void lista_par() {
+        escopo=2;
         System.out.println("simbolo list_par>>" + simbolo.getValor());
         Tipovari();
         if (verificaSimbolo(":")) {
@@ -255,6 +255,7 @@ public class SintaticoProgramaV2 {
             E = i + N + 1;
             try {
                 outputtxt(i + ".PUSHER " + E);
+                outputtxt(i + ".CHPR " + prim_instru);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -349,7 +350,7 @@ public class SintaticoProgramaV2 {
                     Maisvari();
                 }
             }
-            if (escopo == 1) {
+            if (escopo != 0) {
                 if (tabelaSimboloProcedimento.containsKey(simbolo.getValor())) {
                     throw new RuntimeException("Erro semântico identificador já encontrado: " + simbolo.getValor());
                 } else {
@@ -357,7 +358,9 @@ public class SintaticoProgramaV2 {
                     try {
                         i = i + 1;
                         outputtxt(i + ".ALME2 " + simbolo.getValor());
-                        N=N+1;
+                        if(escopo==2){
+                            N=N+1;
+                        }
                         S = S + 1;
                         //pilhaD.push(simbolo.getValor()); ADICIONAR VARIVAVEL
                         end_rel = S;
