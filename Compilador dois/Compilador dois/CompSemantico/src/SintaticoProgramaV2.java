@@ -18,20 +18,22 @@ public class SintaticoProgramaV2 {
     ArrayList<String> ARRAY_MAIN = new ArrayList<String>();
     ArrayList<String> ARRAY_PROCEDURE = new ArrayList<String>();
     int i; // index de codigoHIP
-    int P; // desvio depois do procedure
+    int desvioIF; // desvio depois do IF
     int E; // fim do procedimento e desalocação das variaveis
     int N; // NUMERO DE PARAMETROS
     int S = 0; // topo pilhaD
     int temp; // manipular o array PIlhaD
     int escopo = 0; // escopo 0 = main, escopo 1 = procedimento 2=parametros
-    int end_rel; // posição da variavel na pilha
     int prim_instru; // onde começa o procedimento
+
+    int SOMA = 0; // verfica se houve soma , se houve mutiplicação, Inversao
+    int mult = 0;
+    Boolean INV = false;
+    int relacionais = 0; // verifica os relacionais <><=>= etc etc
 
     String isCod = ""; // indica se está acontecendo um comando de leitura
     int tempAloc = 0;
-    String rel = ""; // operador relacional atual
-    int procStartLine[] = new int[256];
-    int numProcDec = 0;
+    String VAR = ""; // referencia da variavel na ARRAY_PROCEDURE
 
     private Lexico lexico;
     private Token simbolo;
@@ -185,7 +187,7 @@ public class SintaticoProgramaV2 {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            
+
             obtemSimbolo();
             System.out.println("simbolo antes de parametros>>" + simbolo.getValor());
             if (simbolo.getTipo() != Token.INDENTIFICADOR) {
@@ -195,7 +197,7 @@ public class SintaticoProgramaV2 {
                     throw new RuntimeException("Erro semântico procedimento já declarado: " + simbolo.getValor());
                 } else {
                     tabelaProcedimento.put(simbolo.getValor(), new Simbolo(this.tipo, simbolo.getValor()));
-                    
+
                     Parametros();
                     obtemSimbolo();
                     Corpo_P();
@@ -246,9 +248,9 @@ public class SintaticoProgramaV2 {
 
     private void Corpo_P() {
         System.out.println("simbolo CorpoP>>" + simbolo.getValor());
-        
+
         DC_loc();
-        
+
         if ((verificaSimbolo("begin"))) {
             obtemSimbolo();
             Comandos();
@@ -272,9 +274,9 @@ public class SintaticoProgramaV2 {
 
     private void DC_loc() {
         System.out.println("simbolo DC_loc>>" + simbolo.getValor());
-            DC_V();
-            MaisDC_loc();
-        
+        DC_V();
+        MaisDC_loc();
+
     }
 
     private void MaisDC_loc() {
@@ -345,7 +347,7 @@ public class SintaticoProgramaV2 {
                         ARRAY_MAIN.add(simbolo.getValor());
                         S = S + 1;
                         // pilhaD.add(simbolo.getValor()); ADICIONAR VARIAVEL
-                        end_rel = i;
+
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -369,7 +371,7 @@ public class SintaticoProgramaV2 {
                         }
                         S = S + 1;
                         // pilhaD.push(simbolo.getValor()); ADICIONAR VARIVAVEL
-                        end_rel = S;
+
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -387,8 +389,8 @@ public class SintaticoProgramaV2 {
         if (verificaSimbolo(",")) {
             obtemSimbolo();
             Variaveis();
-        }else{
-            //do nothing
+        } else {
+            // do nothing
         }
 
     }
@@ -445,6 +447,12 @@ public class SintaticoProgramaV2 {
                 } else {
                     System.out.println("escreveu >> " + simbolo.getValor());
                     try {
+                        VAR = simbolo.getValor();
+                        temp = ARRAY_PROCEDURE.indexOf(VAR);
+                
+                        
+                        i = i + 1;
+                        outputtxt(i + ".CLVR " + VAR + " POSICAO " + temp);
                         i = i + 1;
                         outputtxt(i + ".IMPR " + simbolo.getValor());
                     } catch (IOException e) {
@@ -464,6 +472,20 @@ public class SintaticoProgramaV2 {
         if (verificaSimbolo("if")) {
             obtemSimbolo();
             condicao();
+            if (relacionais > 0)
+                try {
+                    i = i + 1;
+                    outputtxt(i + ".COMPARACAO ");
+                    relacionais = 0;
+                    i = i + 1;
+                    desvioIF = i;
+                    outputtxt(""); // inicio do if vai aqui
+
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    
+                }
 
         }
         if (verificaSimbolo("then")) {
@@ -495,31 +517,31 @@ public class SintaticoProgramaV2 {
 
                 if (!tabelaProcedimento.containsKey(simbolo.getValor())) {
 
-                    rel=simbolo.getValor();
-                    try {  ///ULTIMO EDIT
-                        i = i + 1;
+                    VAR = simbolo.getValor();
 
-                        temp = ARRAY_PROCEDURE.indexOf(simbolo.getValor());
-                        if(temp != -1){
-                            outputtxt(i + ".ARMZlocal " + simbolo.getValor() + " POSICAO " + temp);
-                            S = S - 1;
-
-                        }
-                        
-
-                        if (temp == -1) {
-                            temp = ARRAY_MAIN.indexOf(simbolo.getValor());
-                            outputtxt(i + ".ARMZ " + simbolo.getValor() + " POSICAO " + temp);
-                            S = S - 1;
-                        }
-
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
                 }
 
                 resto_indent();
+                try {
+                    i = i + 1;
+
+                    temp = ARRAY_PROCEDURE.indexOf(VAR);
+                    if (temp != -1) {
+                        outputtxt(i + ".ARMZlocal " + VAR + " POSICAO " + temp);
+                        S = S - 1;
+
+                    }
+
+                    if (temp == -1) {
+                        temp = ARRAY_MAIN.indexOf(VAR);
+                        outputtxt(i + ".ARMZ " + VAR + " POSICAO " + temp);
+                        S = S - 1;
+                    }
+
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -562,27 +584,25 @@ public class SintaticoProgramaV2 {
         System.out.println("termo >> " + simbolo.getValor());
         op_un();
         fator();
+        if (INV) {
+            try {
+                i = i + 1;
+                outputtxt(i + ".INV");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            INV = false;
+        }
+
         mais_fatores();
     }
 
     private void op_un() {
         if (verificaSimbolo("-")) {
             System.out.println("op_UN   " + simbolo.getValor());
+            INV = true;
             obtemSimbolo();
-            try {
-                i = i + 1;
-                outputtxt(i + ".SUBT ");// String.valueOf(PILHAREAL.get(0))
-                /*
-                 * temp = (pilhaD.get(S-1)-pilhaD.get(S));
-                 * pilhaD.remove(S-1);
-                 * pilhaD.remove(S);
-                 * pilhaD.add(temp);
-                 */
-                S = S - 1;
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
 
         }
 
@@ -591,38 +611,14 @@ public class SintaticoProgramaV2 {
     private void op_mul() {
         if (verificaSimbolo("*") || verificaSimbolo("/")) {
             System.out.println("op_MUl " + simbolo.getValor());
+
             if (verificaSimbolo("*")) {
-                try {
-                    i = i + 1;
-                    outputtxt(i + ".MULT ");// String.valueOf(PILHAREAL.get(0))
-                    /*
-                     * temp = (pilhaD.get(S-1)*pilhaD.get(S));
-                     * pilhaD.remove(S-1);
-                     * pilhaD.remove(S);
-                     * pilhaD.add(temp);
-                     * S = S - 1;
-                     */
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                mult = 1;
             }
             if (verificaSimbolo("/")) {
-                try {
-                    i = i + 1;
-                    outputtxt(i + ".DIV ");// String.valueOf(PILHAREAL.get(0))
-                    /*
-                     * temp = (pilhaD.get(S-1)/pilhaD.get(S));
-                     * pilhaD.remove(S-1);
-                     * pilhaD.remove(S);
-                     * pilhaD.add(temp);
-                     * S = S - 1;
-                     */
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                mult = 2;
             }
+
             obtemSimbolo();
         }
     }
@@ -630,24 +626,16 @@ public class SintaticoProgramaV2 {
     private void op_ad() {
         if (verificaSimbolo("+")) {
             System.out.println("op_AD   " + simbolo.getValor());
-            obtemSimbolo();
-            try {
-                i = i + 1;
-                outputtxt(i + ".SOMA ");// String.valueOf(PILHAREAL.get(0))
-                /*
-                 * temp = (pilhaD.get(S-1)+pilhaD.get(S));
-                 * pilhaD.remove(S-1);
-                 * pilhaD.remove(S);
-                 * pilhaD.add(temp);
-                 */
-                S = S - 1;
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+
+            SOMA = 1;
 
         }
+        if (verificaSimbolo("-")) {
 
+            SOMA = 2;
+
+        }
+        obtemSimbolo();
     }
 
     private void fator() {
@@ -659,7 +647,7 @@ public class SintaticoProgramaV2 {
                 i = i + 1;
                 // pilhaD.add(Double.parseDouble(simbolo.getValor()));
                 // S = S + 1;
-                outputtxt(i + ".CRCT " + simbolo.getValor());
+                outputtxt(i + ".CRVL " + simbolo.getValor());
 
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -692,7 +680,7 @@ public class SintaticoProgramaV2 {
 
                 // pilhaD.add(simbolo.getValor()); adicionar endereço da variavel
                 i = i + 1;
-                outputtxt(i + ".CRVL " + simbolo.getValor());
+                outputtxt(i + ".CRCT " + simbolo.getValor());
                 S = S + 1;
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -712,9 +700,6 @@ public class SintaticoProgramaV2 {
             }
         } else {
 
-
-
-
             System.out.println("saida fator " + simbolo.getValor());
         }
 
@@ -725,7 +710,64 @@ public class SintaticoProgramaV2 {
             System.out.println("mais fatores: " + simbolo.getValor());
             op_mul();
             fator();
+            if (mult == 1) {
+                try {
+                    i = i + 1;
+                    outputtxt(i + ".MULT ");// String.valueOf(PILHAREAL.get(0))
+                    /*
+                     * temp = (pilhaD.get(S-1)*pilhaD.get(S));
+                     * pilhaD.remove(S-1);
+                     * pilhaD.remove(S);
+                     * pilhaD.add(temp);
+                     * S = S - 1;
+                     */
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            if (mult == 2) {
+                try {
+                    i = i + 1;
+                    outputtxt(i + ".DIV ");// String.valueOf(PILHAREAL.get(0))
+                    /*
+                     * temp = (pilhaD.get(S-1)/pilhaD.get(S));
+                     * pilhaD.remove(S-1);
+                     * pilhaD.remove(S);
+                     * pilhaD.add(temp);
+                     * S = S - 1;
+                     */
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            mult = 0;
+
             mais_fatores();
+
+        }
+        if (SOMA == 1) {
+            try {
+                i = i + 1;
+                outputtxt(i + ".SOMA ");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            SOMA = 0;
+
+        }
+        if (SOMA == 2) {
+            try {
+                i = i + 1;
+                outputtxt(i + ".SUB ");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            SOMA = 0;
+
         }
     }
 
@@ -750,48 +792,23 @@ public class SintaticoProgramaV2 {
         System.out.println("relação  " + simbolo.getValor());
         if (verificaSimbolo("<") || verificaSimbolo(">") || verificaSimbolo("<>")) {
             if (verificaSimbolo("<")) {
-                try {
-                    i = i + 1;
-                    outputtxt(i + ".CPME ");
-                    S = S - 1;
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+
+                relacionais = 1;
 
             }
             if (verificaSimbolo(">")) {
-                try {
-                    i = i + 1;
-                    outputtxt(i + ".CPMA ");
-                    S = S - 1;
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                relacionais = 2;
 
             }
             if (verificaSimbolo("<>")) {
-                try {
-                    i = i + 1;
-                    outputtxt(i + ".CDES ");
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                relacionais = 3;
 
             }
             obtemSimbolo();
 
         } else if (verificaSimbolo("=") || verificaSimbolo(">=") || verificaSimbolo("<=")) {
             if (verificaSimbolo(">=")) {
-                try {
-                    i = i + 1;
-                    outputtxt(i + ".CMAI ");
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                relacionais = 4;
 
             }
             obtemSimbolo();
@@ -805,6 +822,23 @@ public class SintaticoProgramaV2 {
         System.out.println("pfalsa: " + simbolo.getValor());
         if (verificaSimbolo("else")) {
             obtemSimbolo();
+            if(desvioIF>0){
+                i = i + 1;
+                codigoHip.add(desvioIF, desvioIF + ".DSVF " + (i+1));
+                
+            }
+            desvioIF=0;
+
+
+            try {
+                outputtxt("ELSE");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+
+            
             System.out.println("simbolo dentro do else: " + simbolo.getValor());
             Comandos();
         }
