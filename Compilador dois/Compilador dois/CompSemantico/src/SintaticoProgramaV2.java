@@ -12,14 +12,14 @@ public class SintaticoProgramaV2 {
 
     ArrayList<String> codigoHip = new ArrayList<String>();
     //Stack<String> codigoHip = new Stack<String>();
-    ArrayList<Double> pilhaD = new ArrayList<Double>();
     ArrayList<String> ARRAY_MAIN = new ArrayList<String>();
-    ArrayList<String> ARRAY_PROCEDURE = new ArrayList<String>();
-    int i=0; // index de codigoHIP
+    int indice=0; // index de codigoHIP
     int desvioIF=0; // desvio depois do IF
     int E; // fim do procedimento e desalocação das variaveis
+    int M=1; //variaveis alocadas no procedimento
     int NARG; // NUMERO DE PARAMETROS
-    int S = 0; // topo pilhaD
+    boolean End=false;
+
     int temp; // manipular o array PIlhaD
     int escopo = 0; // escopo 0 = main, escopo 1 = procedimento 2=parametros
     int prim_instru; // onde começa o procedimento
@@ -32,6 +32,14 @@ public class SintaticoProgramaV2 {
     String isCod = ""; // indica se está acontecendo um comando de leitura
     int tempAloc = 0;
     String VAR = ""; // referencia da variavel na ARRAY_PROCEDURE
+
+
+    //EXECUÇÃO
+
+    ArrayList<Double> pilhaD = new ArrayList<Double>();
+    int S=0;  // topo da pilha
+
+
 
     private Lexico lexico;
     private Token simbolo;
@@ -54,15 +62,15 @@ public class SintaticoProgramaV2 {
         FileWriter fw = new FileWriter(file, false);
         PrintWriter pw = new PrintWriter(fw);
 
-        if (Code == "PARA") {
-            for (int i = 0; i < codigoHip.size(); i++) {
-                pw.write(codigoHip.get(i));
-                // System.out.println(this.codigoHip.get(i));
+        if (End) {
+            for (int indice = 0; indice < codigoHip.size(); indice++) {
+                pw.write(codigoHip.get(indice));
+                // System.out.println(this.codigoHip.get(indice));
             }
             
                 pwv.write(codigoHip.toString());
                 
-                // System.out.println(this.codigoHip.get(i));
+                // System.out.println(this.codigoHip.get(indice));
             
 
             pwv.close();
@@ -75,7 +83,7 @@ public class SintaticoProgramaV2 {
 
     public SintaticoProgramaV2(String arq) {
         lexico = new Lexico(arq);
-
+        
     }
 
     private void obtemSimbolo() {
@@ -94,8 +102,7 @@ public class SintaticoProgramaV2 {
             throw new RuntimeException("Erro sintático Programa não declarado: " + simbolo.getValor());
         } else {
             try {
-                outputtxt(i + ".INPP");
-                S = S - 1;
+                outputtxt(indice + ".INPP");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -122,16 +129,10 @@ public class SintaticoProgramaV2 {
         System.out.println("simbolo antes de begin>> " + simbolo.getValor());
         if ((verificaSimbolo("begin"))) {
             obtemSimbolo();
-            //i = i + 1;
             
-            try {
-                i = i+1;
-                codigoHip.add(prim_instru,prim_instru + ".DSVI " + i+"\n");
-                outputtxt(i+".begin");
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                codigoHip.add(prim_instru,prim_instru + ".DSVI " +(indice+1)+"\n");
+        
+           
             Comandos();
         }
         if (verificaSimbolo("end")) {
@@ -179,7 +180,8 @@ public class SintaticoProgramaV2 {
 
         } else {
             escopo = 1;
-            prim_instru = i; //INICIO DO PROCEDIMENTO
+            indice=indice+1;
+            prim_instru = indice; //INICIO DO PROCEDIMENTO DSVi
            
 
            
@@ -252,6 +254,15 @@ public class SintaticoProgramaV2 {
             Comandos();
         }
         if (verificaSimbolo("end")) {
+            try {
+                indice=indice+1;
+                outputtxt(indice+".DESM "+M);
+                indice=indice+1;
+                outputtxt(indice+".RTPR ");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             escopo = 0;
             obtemSimbolo(); // fim procedimento
             
@@ -288,23 +299,21 @@ public class SintaticoProgramaV2 {
             obtemSimbolo();
             if (!tabelaProcedimento.containsKey(simbolo.getValor())) {
                 System.out.println("simbolo de argumentos " + simbolo.getValor());
-               
-                
-                
-                    i = i + 1;
-                    desvioIF=i;
-                   // outputtxt(i + ".PUSHER " + (E));
+                   
+                   // outputtxt(indice + ".PUSHER " + (E));
                
                 }
+                indice = indice + 1;
+                desvioIF=indice;
                 argumentos();
 
               
                 codigoHip.add(desvioIF,desvioIF + ".PUSHER " + (desvioIF+NARG+2)+"\n");
-                //CALCULAR O DESVIO DO PUSHER  usando i=desvioIF + N parametros
+                //CALCULAR O DESVIO DO PUSHER  usando indice=desvioIF + N parametros
                 
                 try {
-                    i = i + 1;
-                    outputtxt(i + ".CHPR " + (prim_instru+1));
+                    indice = indice + 1;
+                    outputtxt(indice + ".CHPR " + (prim_instru+1));
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -326,13 +335,12 @@ public class SintaticoProgramaV2 {
             throw new RuntimeException("Erro sintático esperado indentificador antes de " + simbolo.getValor());
         } else {
             try {
-                i = i + 1;
                 NARG = NARG + 1;
                 VAR = simbolo.getValor();
                 temp = ARRAY_MAIN.indexOf(VAR);
 
-                
-                outputtxt(i+".PARAM "+simbolo.getValor()+" POSICAO " + temp);
+                indice = indice + 1;
+                outputtxt(indice+".PARAM "+temp);
 
 
 
@@ -364,11 +372,10 @@ public class SintaticoProgramaV2 {
                 } else {
                     tabelaSimbolo.put(simbolo.getValor(), new Simbolo(this.tipo, simbolo.getValor()));
                     try {
-                        i = i + 1;
-                        outputtxt(i + ".ALME " + simbolo.getValor());
+                        indice = indice + 1;
+                        outputtxt(indice + ".ALME 1");
                         ARRAY_MAIN.add(simbolo.getValor());
-                        S = S + 1;
-                        // pilhaD.add(simbolo.getValor()); ADICIONAR VARIAVEL
+                        
 
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
@@ -384,9 +391,11 @@ public class SintaticoProgramaV2 {
                 } else {
                     tabelaSimboloProcedimento.put(simbolo.getValor(), new Simbolo(this.tipo, simbolo.getValor()));
                     try {
-                        i = i + 1;
-                        outputtxt(i + ".ALME2 " + simbolo.getValor());
-                        ARRAY_PROCEDURE.add(simbolo.getValor());
+                        indice = indice + 1;
+                        outputtxt(indice + ".ALME 1");
+                        ARRAY_MAIN.add(simbolo.getValor());
+                            M=M+1;
+        
 
 
                     } catch (IOException e) {
@@ -438,9 +447,27 @@ public class SintaticoProgramaV2 {
                 } else {
                     System.out.println("READ >> " + simbolo.getValor());
                     try {
-                        i = i + 1;
-                        outputtxt(i + ".LEIT " + simbolo.getValor());
-                        S = S + 1;
+                       
+                        VAR=simbolo.getValor();
+                        if (escopo==1) {
+                            temp = ARRAY_MAIN.lastIndexOf(VAR);
+                            indice = indice + 1;
+                            outputtxt(indice + ".LEIT ");
+
+                            indice=indice+1;
+                            outputtxt(indice + ".ARMZ " + temp);
+                           
+                            
+                        }
+                        if (escopo==0) {
+                            temp = ARRAY_MAIN.indexOf(VAR);
+                            indice = indice + 1;
+                            outputtxt(indice + ".LEIT ");
+                            indice=indice+1;
+                            outputtxt(indice + ".ARMZ "+ temp);
+                          
+                            
+                        }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -465,17 +492,19 @@ public class SintaticoProgramaV2 {
                     System.out.println("escreveu >> " + simbolo.getValor());
                     try {
                         VAR = simbolo.getValor();
-                        temp = ARRAY_PROCEDURE.indexOf(VAR);
-                        if(escopo==0){
-                            temp = ARRAY_MAIN.indexOf(VAR);
+                        temp = ARRAY_MAIN.indexOf(VAR);
+                        if(escopo==1){
+                            temp = ARRAY_MAIN.lastIndexOf(VAR);
                         }
                         
                 
-                        i = i + 1;
-                        outputtxt(i + ".CLVR " + VAR + " POSICAO " + temp);
+                        indice = indice + 1;
+                        outputtxt(indice + ".CLVR "+ temp);
+                        
 
-                        i = i + 1;
-                        outputtxt(i + ".IMPR " + simbolo.getValor());
+                        indice = indice + 1;
+                        outputtxt(indice + ".IMPR " + simbolo.getValor());
+                        
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -507,19 +536,15 @@ public class SintaticoProgramaV2 {
         if (verificaSimbolo("while")) {
             obtemSimbolo();
             condicao();
+            
         }
         if (verificaSimbolo("do")) {
             obtemSimbolo();
             Comandos();
+            codigoHip.add(desvioIF,desvioIF+".DSVF "+(indice+1)+"\n");
         }
 
         if (verificaSimbolo("$")) {
-            if(desvioIF>0){
-                i = i + 1;
-                 codigoHip.add(desvioIF, (desvioIF) + ".DSVF " + (i)+"\n");
-                 desvioIF=0;
-             }
-         
             obtemSimbolo();
         }
 
@@ -538,19 +563,20 @@ public class SintaticoProgramaV2 {
                 resto_indent();
                 try {
                     
-                    i = i + 1;
+                    indice = indice + 1;
                     
-                    temp = ARRAY_PROCEDURE.indexOf(VAR);
+                    
                     if (escopo==1) {
-                        outputtxt(i + ".ARMZlocal " + VAR + " POSICAO " + temp);
-                        S = S - 1;
+                        temp = ARRAY_MAIN.lastIndexOf(VAR);
+                        outputtxt(indice + ".ARMZ "+ temp);
+                       
                         
                     }
 
-                    if (temp == -1) {
+                    if (escopo == 0) {
                         temp = ARRAY_MAIN.indexOf(VAR);
-                        outputtxt(i + ".ARMZ " + VAR + " POSICAO " + temp);
-                        S = S - 1;
+                        outputtxt(indice + ".ARMZ "+ temp);
+                       
                     }
 
                 } catch (IOException e) {
@@ -601,8 +627,8 @@ public class SintaticoProgramaV2 {
         fator();
         if (INV) {
             try {
-                i = i + 1;
-                outputtxt(i + ".INV");
+                indice = indice + 1;
+                outputtxt(indice + ".INVE");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -659,8 +685,34 @@ public class SintaticoProgramaV2 {
         if (simbolo.getTipo() == Token.INDENTIFICADOR) {
             try {
 
-                i = i + 1;
-                outputtxt(i + ".CRVL " + simbolo.getValor());
+                VAR=simbolo.getValor();
+                if (escopo==1) {
+                    temp = ARRAY_MAIN.lastIndexOf(VAR);
+                    indice=indice+1;
+                    outputtxt(indice + ".CRVL " + temp);
+                    
+                    
+                    pilhaD.add((double) temp); 
+                    S=S+1;
+                   
+                    
+                }
+                if (escopo==0) {
+                    temp = ARRAY_MAIN.indexOf(VAR);
+                    indice=indice+1;
+                    outputtxt(indice + ".CRVL "+ temp);
+                    pilhaD.add((double) temp); 
+                    S=S+1;
+                  
+                    
+                }
+
+
+
+
+
+
+
 
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -679,8 +731,10 @@ public class SintaticoProgramaV2 {
         if (simbolo.getTipo() == Token.REAL) {
             try {
                 // pilhaD.add(Double.parseDouble(simbolo.getValor()));
-                i = i + 1;
-                outputtxt(i + ".CRCT " + simbolo.getValor());
+                indice = indice + 1;
+                outputtxt(indice + ".CRCT " + simbolo.getValor());
+
+                
 
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -691,10 +745,13 @@ public class SintaticoProgramaV2 {
         if (simbolo.getTipo() == Token.INTEIRO) {
             try {
 
-                // pilhaD.add(simbolo.getValor()); adicionar endereço da variavel
-                i = i + 1;
-                outputtxt(i + ".CRCT " + simbolo.getValor());
-                S = S + 1;
+                indice = indice + 1;
+                outputtxt(indice + ".CRCT " + simbolo.getValor());
+
+                pilhaD.add(Double.parseDouble(simbolo.getValor())); 
+                S=S+1;
+
+
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -725,15 +782,9 @@ public class SintaticoProgramaV2 {
             fator();
             if (mult == 1) {
                 try {
-                    i = i + 1;
-                    outputtxt(i + ".MULT ");// String.valueOf(PILHAREAL.get(0))
-                    /*
-                     * temp = (pilhaD.get(S-1)*pilhaD.get(S));
-                     * pilhaD.remove(S-1);
-                     * pilhaD.remove(S);
-                     * pilhaD.add(temp);
-                     * S = S - 1;
-                     */
+                    indice = indice + 1;
+                    outputtxt(indice + ".MULT ");
+
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -741,15 +792,9 @@ public class SintaticoProgramaV2 {
             }
             if (mult == 2) {
                 try {
-                    i = i + 1;
-                    outputtxt(i + ".DIV ");// String.valueOf(PILHAREAL.get(0))
-                    /*
-                     * temp = (pilhaD.get(S-1)/pilhaD.get(S));
-                     * pilhaD.remove(S-1);
-                     * pilhaD.remove(S);
-                     * pilhaD.add(temp);
-                     * S = S - 1;
-                     */
+                    indice = indice + 1;
+                    outputtxt(indice + ".DIVI ");
+                    
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -762,8 +807,8 @@ public class SintaticoProgramaV2 {
         }
         if (SOMA == 1) {
             try {
-                i = i + 1;
-                outputtxt(i + ".SOMA ");
+                indice = indice + 1;
+                outputtxt(indice + ".SOMA ");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -773,8 +818,8 @@ public class SintaticoProgramaV2 {
         }
         if (SOMA == 2) {
             try {
-                i = i + 1;
-                outputtxt(i + ".SUB ");
+                indice = indice + 1;
+                outputtxt(indice + ".SUBT ");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -801,36 +846,38 @@ public class SintaticoProgramaV2 {
         expressao();
         if (relacionais > 0){
             try {
-                i = i + 1;
+                indice = indice + 1;
                 if (relacionais == 1){
-                outputtxt(i + ".CPME ");
+                outputtxt(indice + ".CPME ");
                 }
                 if (relacionais == 2){
-                    outputtxt(i + ".CPMA ");
+                    outputtxt(indice + ".CPMA ");
                 }
                 if (relacionais == 3){
-                    outputtxt(i + ".CDES ");
+                    outputtxt(indice + ".CDES ");
                 }
                 if (relacionais == 4){
-                    outputtxt(i + ".CPMI ");
+                    outputtxt(indice + ".CPMI ");
                 }
                 if (relacionais == 5){
-                    outputtxt(i + ".CMAI ");
+                    outputtxt(indice + ".CMAI ");
                 }
                 if (relacionais == 6){
-                    outputtxt(i + ".CPIG ");
+                    outputtxt(indice + ".CPIG ");
                 }
                 
-                
-                
-                i = i + 1;
-                desvioIF = i;  //DSVF
-                //outputtxt(""); // inicio do if vai aqui
-
-
-
-
                 relacionais = 0;
+                
+                indice = indice + 1;
+                desvioIF = indice;  //DSVF
+                //outputtxt(indice+"---DSVF AQUI----");
+                
+                
+
+
+
+
+               
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -863,7 +910,7 @@ public class SintaticoProgramaV2 {
 
             }
             if (verificaSimbolo("<=")) {
-                relacionais = 4;
+                relacionais = 5;
 
             }
             if (verificaSimbolo("=")) {
@@ -881,25 +928,22 @@ public class SintaticoProgramaV2 {
         System.out.println("pfalsa: " + simbolo.getValor());
         if (verificaSimbolo("else")) {
             obtemSimbolo();
-           
-            if(desvioIF>0){
-               i = i + 1;
-                codigoHip.add(desvioIF, (desvioIF) + ".DSVF " + (i)+"\n");
-                desvioIF=0;
-                try {
-                
-                    outputtxt(i+".ELSE");
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+
+            /* por algum motivo o primeiro DSVF é inserido uma linha a +
+            quando dentro do prcedimento, tentie por HORAS arrumar , não consegui
+            descobrir o porque então fiz essa gambiarra*/
+
+            if (escopo==1){ 
+
+                codigoHip.add((desvioIF-1),desvioIF+".DSVF "+(indice+1)+"\n");
+
+            }else{
+                codigoHip.add(desvioIF,desvioIF+".DSVF "+(indice+1)+"\n");
             }
-
-
             
 
+           
 
-            
             System.out.println("simbolo dentro do else: " + simbolo.getValor());
             Comandos();
         }
@@ -912,8 +956,12 @@ public class SintaticoProgramaV2 {
         if (simbolo == null) {
             System.out.println("Tudo Certo!");
             try {
-                //i = i + 1;
-                outputtxt("PARA");
+               indice = indice + 1;
+               //outputtxt(indice+"ultimo index");
+               End=true;
+               outputtxt(indice+".PARA");
+               
+               
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

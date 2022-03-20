@@ -1,10 +1,22 @@
 public class App {
     public static void main(String[] args) throws Exception {
-        System.out.println("primeiro compilador");
+        System.out.println("Segundo compilador");
 
 
         SintaticoProgramaV2 S = new SintaticoProgramaV2("inputV2.txt");
-        //SintaticoPrograma S = new SintaticoPrograma("input.txt");
-        S.Analisador();
+        
+        //S.Analisador();
+        Executor exe = new Executor();
+
+        exe.executor("output.txt");
+
+        
+
+   
+        
     }
+
+    
+
+    
 }
