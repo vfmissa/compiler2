@@ -125,7 +125,7 @@ public class Lexico {
             return new Token(Token.OPERADOR, tipo);
           }
           break;
-        /*case 5 :
+        /*case 5 :            NÃO CONSEGUI RESOLVER OS ERROS QUE DAVAM AO TENTAR LER OS COMENTARIOS
           if(c!='}'){
             c=proxChar();  
           }else{

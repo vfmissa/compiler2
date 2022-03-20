@@ -5,9 +5,10 @@ public class App {
 
         SintaticoProgramaV2 S = new SintaticoProgramaV2("inputV2.txt");
         
-        //S.Analisador();
-        Executor exe = new Executor();
+        //S.Analisador();  //vai pega o codigo e tranforma em codigohip, armazena em output.txt
 
+
+        Executor exe = new Executor();//classe que executa o codigohip
         exe.executor("output.txt");
 
         

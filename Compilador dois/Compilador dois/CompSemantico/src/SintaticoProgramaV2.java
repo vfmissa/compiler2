@@ -499,7 +499,7 @@ public class SintaticoProgramaV2 {
                         
                 
                         indice = indice + 1;
-                        outputtxt(indice + ".CLVR "+ temp);
+                        outputtxt(indice + ".CRVL "+ temp);
                         
 
                         indice = indice + 1;
@@ -954,7 +954,8 @@ public class SintaticoProgramaV2 {
         obtemSimbolo();
         Prog();
         if (simbolo == null) {
-            System.out.println("Tudo Certo!");
+            System.out.println("Tudo Certo!\n");
+            System.out.println("CHAMA O EXECUTOR PARA LER O CODHIP\n");
             try {
                indice = indice + 1;
                //outputtxt(indice+"ultimo index");
