@@ -7,7 +7,7 @@ public class Lexico {
   private char[] programa;
   private int estado;
   private int posicao_texto;
-
+  Boolean coment =false;
   public Lexico(String arquivo) {
     try {
       byte[] bDados = Files.readAllBytes(Paths.get(arquivo));
@@ -33,6 +33,19 @@ public class Lexico {
 
   private boolean isExpression(char c){
     return (   c==':'|| c=='='  ||  c=='>'|| c=='<'|| c=='*'|| c=='/' || c=='+'|| c=='-');
+  }
+
+  private boolean isCommentstart(char c) {
+    return (c == '{');
+  }
+  private boolean isnotCommentEND(char c) {
+    return (c != '}');
+  }
+  private boolean isCommentstart2(char c) {
+    return (c=='/');
+  }
+  private boolean isnotCommentEND2(char c) {
+    return (c!='/');
   }
 
   private boolean isEOF() {
@@ -65,10 +78,11 @@ public class Lexico {
       c = proxChar();
         switch (estado) {
         case 0:
-          /*if(c=='{'){
+          if(isCommentstart(c)){
             estado=5;
-          }
-          else */if (isEspaco(c)) {
+          }else if(isCommentstart2(c)&&proxChar()=='*'){
+            estado=6;
+          }else if (isEspaco(c)) {
             estado = 0;
           } else if (isDigito(c)) {
             estado = 1;
@@ -125,14 +139,29 @@ public class Lexico {
             return new Token(Token.OPERADOR, tipo);
           }
           break;
-        /*case 5 :            NÃO CONSEGUI RESOLVER OS ERROS QUE DAVAM AO TENTAR LER OS COMENTARIOS
-          if(c!='}'){
-            c=proxChar();  
-          }else{
-            System.out.println("---- "+ c);
-            return new Token(Token.INDENTIFICADOR, tipo);
+        case 5 :            
+          if(isnotCommentEND(c)){
+            estado=5;
+            tipo+=c;
+            //System.out.println("--------"+tipo); 
+          }else{ 
+            estado=0;
+            tipo="";
+            
           }
-          break;   */
+          break;
+          case 6 :            
+          if(c=='*' && (proxChar()=='/')){
+            estado=0;
+            tipo="";
+            
+          }else{
+            estado=6;
+            tipo+=c;
+            //System.out.println("--------"+tipo); 
+          }
+        break;
+          
           
       }
     }

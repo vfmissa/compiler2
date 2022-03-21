@@ -1,6 +1,6 @@
-## COMPILADOR COM GERAÇÃO DE CODIGO .JAVA
-PRECISA ARRUMAR O LEXICO PARA RECONHECER COMENTARIOS
-EXECUÇÃO DO CODIGO INTERMEDIARIO POR MEIO DE LEITURA DE ARQUIVO, GRANDE ERRO DA MINHA PARTE 
+## Getting Started
+
+Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
 
 ## Folder Structure
 
